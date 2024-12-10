@@ -1,0 +1,7 @@
+ECHO is on.
+
+# Visual Studio files
+
+.vs/
+DataStructure_Project_UAS/bin/
+DataStructure_Project_UAS/obj/
