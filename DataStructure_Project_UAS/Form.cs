@@ -7,7 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DataStructure_Project_UAS
 {
@@ -15,6 +17,8 @@ namespace DataStructure_Project_UAS
     {
         int[] data;
         int[] sorted;
+        double timeElapsed = 0;
+        double count = 0;
 
         public string Title { get; private set; }
         public string Filter { get; private set; }
@@ -60,12 +64,13 @@ namespace DataStructure_Project_UAS
                     MessageBox.Show($"Error reading file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            listBoxOutput.DataSource = data;
         }
 
         private int[] ParseNumbersFromText(string content)
         {
             //Memisahkan text menggunakan spasi, koma, baris baru
-            string[] parts = content.Split(new[] { ' ', ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = content.Split(new[] { ' ', ',', '\n', '\r',';','"' }, StringSplitOptions.RemoveEmptyEntries);
 
             //Mengkonversi string ke array angka
             return parts.Select(int.Parse).ToArray();
@@ -73,6 +78,7 @@ namespace DataStructure_Project_UAS
 
         private void buttonSort_Click(object sender, EventArgs e)
         {
+            bool descend = false;
             if (data == null || data.Length == 0)
             {
                 MessageBox.Show("No data loaded. Please selec a valid file", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -85,54 +91,104 @@ namespace DataStructure_Project_UAS
             }
             if (comboBoxSortMethod.SelectedIndex == 0 && comboBoxOrder.SelectedIndex == 0)
             {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 sorted = Sort.InsertionSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
             }
             else if (comboBoxSortMethod.SelectedIndex == 0 && comboBoxSortMethod.SelectedIndex == 1)
             {
-
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                sorted = Sort.InsertionSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
+                sorted = Descender(sorted);
+                descend = true;
             }
             else if (comboBoxSortMethod.SelectedIndex == 1 && comboBoxOrder.SelectedIndex == 0)
             {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 sorted = Sort.BubbleSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
             }
             else if (comboBoxSortMethod.SelectedIndex == 1 && comboBoxOrder.SelectedIndex == 1)
             {
-
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                sorted = Sort.BubbleSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
+                sorted = Descender(sorted);
+                descend = true;
             }
             else if (comboBoxSortMethod.SelectedIndex == 2 && comboBoxOrder.SelectedIndex == 0)
             {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 sorted = Sort.HeapSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
             }
             else if (comboBoxSortMethod.SelectedIndex == 2 && comboBoxOrder.SelectedIndex == 1)
             {
-
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                sorted = Sort.HeapSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
+                sorted = Descender(sorted);
+                descend = true;
             }
             else if (comboBoxSortMethod.SelectedIndex == 3 && comboBoxOrder.SelectedIndex == 0)
             {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 sorted = Sort.RadixSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
             }
             else if (comboBoxSortMethod.SelectedIndex == 3 && comboBoxOrder.SelectedIndex == 1)
             {
-
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                sorted = Sort.RadixSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
+                sorted = Descender(sorted);
+                descend = true;
             }
             else if (comboBoxSortMethod.SelectedIndex == 4 && comboBoxOrder.SelectedIndex == 0)
             {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 sorted = Sort.MergeSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
             }
             else if (comboBoxSortMethod.SelectedIndex == 4 && comboBoxOrder.SelectedIndex == 1)
             {
-
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                sorted = Sort.MergeSort(data);
+                watch.Stop();
+                timeElapsed = watch.ElapsedMilliseconds;
+                sorted = Descender(sorted);
+                descend = true;
             }
             else
             {
                 MessageBox.Show("Invalid selection. Please check your options.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            listBoxOutput.Text = string.Join(", ", sorted);
 
-            labelAccuracy.Text = 0.ToString();
-            labelPecahan.Text = 0.ToString();
-            labelTimeElapsed.Text = 0.ToString();
+            //Listbox Output
+            labelOutput.Text = "DISPLAY OUTPUT : ";
+            listBoxOutput.DataSource = null;
+            listBoxOutput.DataSource = sorted;
+
+            //Accuracy
+            count = SortChecker(sorted,descend);
+            double percentage = (count/sorted.Length) * 100;
+            labelAccuracy.Text = percentage.ToString();
+            labelPecahan.Text = count.ToString();
+            labelJumlahData.Text = "/"+ sorted.Length + ")";
+
+            //Time Elapsed
+            labelTimeElapsed.Text = timeElapsed.ToString();
         }
 
         private void buttonDownload_Click(object sender, EventArgs e)
@@ -158,7 +214,7 @@ namespace DataStructure_Project_UAS
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     //Get the selected file path
-                    string filePath = saveFileDialog.FileName;
+                    string filePath = saveFileDialog.FileName + ".txt";
 
                     //Write the ListBox items to the file
                     using (StreamWriter writer = new StreamWriter(filePath))
@@ -182,7 +238,7 @@ namespace DataStructure_Project_UAS
             textBoxInputPathLink.Text = "input file";
             comboBoxSortMethod.SelectedIndex = -1;
             comboBoxOrder.SelectedIndex = -1;
-            listBoxOutput.Items.Clear();
+            listBoxOutput.DataSource = null;
             textBoxFileName.Text = "file name";
             labelAccuracy.Text = "?";
             labelPecahan.Text = "?";
@@ -193,5 +249,51 @@ namespace DataStructure_Project_UAS
         {
             this.Close();
         }
+
+        #region DIAGNOSTICS
+        private double SortChecker(int[] dataset,bool descend)
+        {
+            if(descend)
+            {
+                double count = 1;
+                for (int i = 0; i < (dataset.Length - 1); i++)
+                {
+                    if (dataset[i] >= dataset[i + 1])
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+            else
+            {
+                double count = 1;
+                for (int i = 0; i < (dataset.Length - 1); i++)
+                {
+                    if (dataset[i] <= dataset[i + 1])
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        }
+        #endregion
+
+
+        #region DESCENDING
+        private int[] Descender(int[] dataset)
+        {
+            int[] result = new int[dataset.Length];
+
+            int index = 0;
+            for (int i = dataset.Length - 1; i > 0; i--)
+            {
+                result[index] = dataset[i];
+                index++;
+            }
+            return result;
+        }
+        #endregion
     }
 }

@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using static DataStructure_Project_UAS.SinglyLinkedList;
 
 namespace DataStructure_Project_UAS
@@ -9,26 +13,18 @@ namespace DataStructure_Project_UAS
 
         public static int[] BubbleSort(int[] c)
         {
-            bool swapped;
             int temp;
 
             for (int i = 0; i < c.Length - 1; i++)
             {
-                swapped = false;
-                for (int j = 0; j < c.Length - i - 1; j++)
+                for (int j = 0; j < c.Length - 1; j++)
                 {
                     if (c[j] > c[j + 1])
                     {
                         temp = c[j];
                         c[j] = c[j + 1];
                         c[j + 1] = temp;
-                        swapped = true;
                     }
-                }
-
-                if (swapped == false)
-                {
-                    break;
                 }
             }
 
@@ -60,7 +56,7 @@ namespace DataStructure_Project_UAS
             {
                 if (index == 0)
                     return;
-                int parent_index = index / 2;
+                int parent_index = (index-1) / 2;
 
                 if (dataset[parent_index] > dataset[index])
                 {
@@ -81,7 +77,7 @@ namespace DataStructure_Project_UAS
                 {
                     return;
                 }
-                if (rchild < (dataset.Length - 1) && dataset[rchild] < dataset[smallest_index])
+                if (rchild < (dataset.Length) && dataset[rchild] < dataset[smallest_index])
                 {
                     smallest_index = rchild;
                 }
@@ -94,58 +90,6 @@ namespace DataStructure_Project_UAS
                 PushDown(dataset, smallest_index);
             }
         }
-
-        public static int[] RadixSort(int[] c)
-        {
-            List<string>[] table = new List<string>[10];
-            for (int i = 0; i < 10; i++)
-            {
-                table[i] = new List<string>();
-            }
-            
-            int iteration = 1;
-
-            for (int j = 0; j < 3; j++)
-            {
-                for (int i = 0; i < c.Length; i++)
-                {
-                    string buffer = c[i].ToString().PadLeft(iteration, '0');
-                    char indChar = buffer[0];
-                    int index = indChar - '0';
-                    table[index].Add(buffer);
-                }
-                c = TranslateToArray(c.Length);
-                EmptyRadix();
-                iteration++;
-            }
-
-            return c;
-
-            int[] TranslateToArray(int size)
-            {
-                int[] result = new int[size];
-                int counter = 0;
-                for (int i = 0; i < table.Length; i++)
-                {
-                    for (int j = 0; j < table[i].Count; j++)
-                    {
-                        result[counter] = int.Parse(table[i][j]);
-                        counter++;
-                    }
-                }
-
-                return result;
-            }
-
-            void EmptyRadix()
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    table[i].Clear();
-                }
-            }
-        }
-
         public static int[] InsertionSort(int[] c)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -182,6 +126,46 @@ namespace DataStructure_Project_UAS
             return TranslateToArray(list, size);
         }
 
+        public static int[] RadixSort(int[] c)
+        {
+            int[] result = new int[c.Length];
+            result = c;
+
+            int maxNumber = result.Max();
+            int maxDigits = maxNumber.ToString().Length;
+
+            List<int>[] radix = new List<int>[10];
+            for(int i=0;i<10;i++)
+            {
+                radix[i] = new List<int>();
+            }
+
+            int digitPlace = 1;
+            for(int i=0; i<maxDigits; i++)
+            {
+                for (int j = 0; j < result.Length; j++)
+                {
+                    int digit = (result[j] / digitPlace) % 10;
+                    radix[digit].Add(result[j]);
+                }
+                int index = 0;
+                for (int j = 0; j < 10; j++)
+                {
+                    foreach (int num in radix[j])
+                    {
+                        result[index] = num;
+                        index++;
+                    }
+                }
+                for (int j = 0; j < 10; j++)
+                {
+                    radix[j].Clear();
+                }
+                digitPlace *= 10;
+            }
+
+            return result;
+        }
         public static int[] MergeSort(int[] c)
         {
             Sort(c, 0, c.Length - 1);
