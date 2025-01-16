@@ -96,7 +96,7 @@ namespace DataStructure_Project_UAS
                 watch.Stop();
                 timeElapsed = watch.ElapsedMilliseconds;
             }
-            else if (comboBoxSortMethod.SelectedIndex == 0 && comboBoxSortMethod.SelectedIndex == 1)
+            else if (comboBoxSortMethod.SelectedIndex == 0 && comboBoxOrder.SelectedIndex == 1)
             {
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 sorted = Sort.InsertionSort(data);
